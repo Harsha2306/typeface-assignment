@@ -2,10 +2,10 @@ package com.harsha.backend.controller;
 
 import com.harsha.backend.dto.FileMetaDataResponseDto;
 import com.harsha.backend.dto.SuccessResponseDto;
+import com.harsha.backend.entity.FileMetaData;
 import com.harsha.backend.service.FileService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,5 +49,18 @@ public class FileController {
             .build();
 
     return new ResponseEntity<>(successResponseDto, HttpStatus.OK);
+  }
+
+  @GetMapping("/{id}/content")
+  public ResponseEntity<byte[]> getFileContent(@PathVariable String id) {
+    byte[] content = fileService.getFileContent(id);
+    FileMetaData meta = fileService.getFileMetaData(id);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.parseMediaType(meta.getFileType()));
+    headers.setContentDisposition(
+        ContentDisposition.inline().filename(meta.getOriginalName()).build());
+
+    return new ResponseEntity<>(content, headers, HttpStatus.OK);
   }
 }

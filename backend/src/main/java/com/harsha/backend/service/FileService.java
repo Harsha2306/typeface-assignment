@@ -92,4 +92,24 @@ public class FileService {
         .map(this::mapToFileMetaDataResponseDto)
         .toList();
   }
+
+  public byte[] getFileContent(String fileId) {
+    FileMetaData metaData =
+        fileMetaDataRepository
+            .findById(fileId)
+            .orElseThrow(() -> new FileStorageException("File not found with ID: " + fileId));
+
+    Path filePath = Paths.get(metaData.getPath());
+    try {
+      return Files.readAllBytes(filePath);
+    } catch (IOException e) {
+      throw new FileStorageException("Could not read file: " + filePath);
+    }
+  }
+
+  public FileMetaData getFileMetaData(String id) {
+    return fileMetaDataRepository
+        .findById(id)
+        .orElseThrow(() -> new FileStorageException("File metadata not found with ID: " + id));
+  }
 }
