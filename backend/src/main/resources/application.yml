@@ -8,10 +8,6 @@ spring:
       uri: mongodb+srv://harsha:WBAj99YUJ0PdoacT@harsha.xastq.mongodb.net/?retryWrites=true&w=majority&appName=Harsha
       database: typeface
       auto-index-creation: true
-  servlet:
-    multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
 
 file:
   upload-dir: uploads

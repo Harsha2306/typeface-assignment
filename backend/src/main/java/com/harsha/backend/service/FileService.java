@@ -2,9 +2,9 @@ package com.harsha.backend.service;
 
 import com.harsha.backend.dto.FileMetaDataResponseDto;
 import com.harsha.backend.entity.FileMetaData;
+import com.harsha.backend.exception.FileStorageException;
 import com.harsha.backend.repository.FileMetaDataRepository;
-import com.harsha.backend.utils.Constants;
-import com.harsha.backend.utils.FileExtension;
+import com.harsha.backend.validation.FileValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,10 +15,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -26,32 +24,36 @@ import java.util.UUID;
 public class FileService {
   private final FileMetaDataRepository fileMetaDataRepository;
 
+  private final FileValidator fileValidator;
+
   @Value("${file.upload-dir}")
   private String uploadDir;
 
-  // TODO check file size limitations and can we move validation logic to another class
-  public FileMetaDataResponseDto uploadFile(MultipartFile file) throws IOException {
+  public FileMetaDataResponseDto uploadFile(MultipartFile file) {
     // Ensure upload dir exists
     Path uploadPath = Paths.get(uploadDir);
-    if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+    if (!Files.exists(uploadPath)) {
+      try {
+        Files.createDirectories(uploadPath);
+      } catch (IOException e) {
+        throw new FileStorageException("Could not create upload directory");
+      }
+    }
 
-    // generate unique file name
+    // Generate unique file name
     String originalName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
     String fileExtension = getFileExtension(originalName);
-    if (!FileExtension.isValid(fileExtension))
-      throw new IllegalArgumentException(Constants.UNSUPPORTED_FILE_TYPE + fileExtension);
-
-    // prevent uploading file with same name
-    Optional<FileMetaData> existing = fileMetaDataRepository.findByOriginalName(originalName);
-    if (existing.isPresent())
-      throw new IllegalArgumentException(Constants.FILE_ALREADY_EXISTS + originalName);
+    fileValidator.validateFile(originalName, fileExtension);
 
     String storedName = UUID.randomUUID() + "." + fileExtension;
 
-    // store file on disk
+    // Store file on disk
     Path filePath = uploadPath.resolve(storedName);
-    // TODO if we are not allowing duplicates, what StandardCopyOption should be applied
-    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+    try {
+      Files.copy(file.getInputStream(), filePath);
+    } catch (IOException e) {
+      throw new FileStorageException("Failed to store file on disk: " + storedName);
+    }
 
     // Build and save metadata
     FileMetaData fileMetaData =

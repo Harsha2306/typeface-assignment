@@ -24,6 +24,20 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler(FileStorageException.class)
+  public ResponseEntity<ErrorResponseDto> handleFileStorageException(FileStorageException ex) {
+    ErrorResponseDto response =
+        ErrorResponseDto.builder()
+            .timeStamp(LocalDateTime.now())
+            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .ok(false)
+            .error("File Storage Error")
+            .message(ex.getMessage())
+            .build();
+
+    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex) {
     ErrorResponseDto errorResponseDto =
