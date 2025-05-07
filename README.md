@@ -1,7 +1,7 @@
 # Application Setup Guide
 
 This README provides instructions on how to set up and run the application which consists of a Spring Boot backend with MongoDB database and a Node.js/NPM frontend.
-
+Limited to jpg, png, pdf formats
 ## Prerequisites
 
 Before you begin, make sure you have the following installed:
@@ -29,7 +29,7 @@ Before you begin, make sure you have the following installed:
 
 ```bash
 git clone https://github.com/Harsha2306/typeface-assignment.git
-cd typeface
+cd typeface-assignment
 ```
 
 ## Step 2: Start MongoDB with Docker
@@ -87,7 +87,7 @@ npm install
 Start the development server:
 
 ```bash
-npm run deev
+npm run dev
 ```
 
 The frontend should now be running on http://localhost:5173
