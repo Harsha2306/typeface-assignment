@@ -5,7 +5,8 @@ spring:
     banner-mode: off
   data:
     mongodb:
-      uri: mongodb+srv://harsha:WBAj99YUJ0PdoacT@harsha.xastq.mongodb.net/?retryWrites=true&w=majority&appName=Harsha
+      host: localhost
+      port: 27017
       database: typeface
       auto-index-creation: true
 
