@@ -7,6 +7,7 @@ import com.harsha.backend.repository.FileMetaDataRepository;
 import com.harsha.backend.validation.FileValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -82,5 +84,12 @@ public class FileService {
   private String getFileExtension(String filename) {
     int dotIndex = filename.lastIndexOf('.');
     return (dotIndex == -1) ? "bin" : filename.substring(dotIndex + 1);
+  }
+
+  public List<FileMetaDataResponseDto> getFiles() {
+    Sort sortBy = Sort.by(Sort.Direction.DESC, "uploadedAt");
+    return fileMetaDataRepository.findAll(sortBy).stream()
+        .map(this::mapToFileMetaDataResponseDto)
+        .toList();
   }
 }
